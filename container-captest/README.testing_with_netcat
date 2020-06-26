@@ -1,0 +1,47 @@
+Included in this container is a "demonstration-ready" copy of netcat,
+to which the Linux capability net_bind_service has been granted.
+
+This "demo" netcat validates whether you have the net_bind_service capability.
+
+If this special copy of netcat lets you listen on a low-numbered port without
+becoming the root user, then the capability has carried into this container.
+
+EXAMPLE DEMOS:
+
+1. Inspect the capabilities on the "normal" and "demo" copies of netcat.
+   The "normal" one doesn't have any capabilities; the "demo" netcat has the
+   net_bind_service capability.
+
+```
+$ filecap /usr/bin/ncat
+$ 
+
+$ filecap /opt/captest/bin/nc.with.net_bind_service
+set       file                 capabilities
+effective /opt/captest/bin/nc.with.net_bind_service     net_bind_service
+````
+
+2. Confirm that the "normal" netcat doesn't let non-root users bind to port 23.
+
+```
+$ whoami
+captest
+
+$ /usr/bin/nc -l 127.0.0.1 23
+Ncat: bind to 127.0.0.1:23: Permission denied. QUITTING.
+```
+
+3. Repeat the "listen-on-port-23-test" using the "demo" netcat binary.
+   Now you can bind to this low port, even without being the root user.
+
+```
+$ whoami
+captest
+
+$ /opt/captest/bin/nc.with.net_bind_service -l 127.0.0.1 23 &
+[1] 32
+
+$ echo "this text is being sent to port 23" | /usr/bin/nc 127.0.0.1 23
+this text is being sent to port 23
+[1]+  Done    /opt/captest/bin/nc.with.net_bind_service -l 127.0.0.1 23
+```

@@ -1,0 +1,35 @@
+# job.captest.yml
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: captest
+spec:
+  template:
+    metadata:
+      labels:
+        captest: test
+      name: captest
+    spec:
+      containers:
+      - name: captest
+        image: quay.io/jteagno/captest
+        volumeMounts:
+        - name: pod-info
+          mountPath: /downward_api
+          readOnly: true
+      volumes:
+      - name: pod-info
+        downwardAPI:
+          defaultMode: 444
+          items:
+          - path: pod_annotations
+            fieldRef:
+              fieldPath: metadata.annotations
+          - path: pod_namespace
+            fieldRef:
+              fieldPath: metadata.namespace
+          - path: pod_name
+            fieldRef:
+              fieldPath: metadata.name
+      restartPolicy: Never
